@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="工时记录">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23667eea' rx='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='280' fill='white' font-family='Arial'%3E⏰%3C/text%3E%3C/svg%3E">
+    <title>员工工时记录系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            margin-top: 20px;
+        }
+
+        .records-section {
+            margin-top: 30px;
+        }
+
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .month-selector h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .summary-card .hours {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #ff3838;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .time-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍴 餐馆员工工时记录</h1>
+
+        <div class="input-section">
+            <h2 style="margin-bottom: 20px; color: #333;">添加工时记录</h2>
+            
+            <div class="form-group">
+                <label>选择员工</label>
+                <select id="employeeSelect">
+                    <option value="Lilou">Lilou</option>
+                    <option value="Jules">Jules</option>
+                    <option value="Charline">Charline</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>日期</label>
+                <input type="date" id="dateInput">
+            </div>
+
+            <div class="time-inputs">
+                <div class="form-group">
+                    <label>上班时间</label>
+                    <input type="time" id="startTime">
+                </div>
+                <div class="form-group">
+                    <label>下班时间</label>
+                    <input type="time" id="endTime">
+                </div>
+            </div>
+
+            <button class="btn" onclick="addRecord()">添加记录</button>
+        </div>
+
+        <div class="records-section">
+            <div class="month-selector">
+                <h2 id="currentMonth"></h2>
+                <button class="btn-export btn" onclick="exportToExcel()" style="width: auto;">📥 导出本月Excel</button>
+            </div>
+
+            <div class="summary-cards" id="summaryCards"></div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>员工</th>
+                        <th>上班时间</th>
+                        <th>下班时间</th>
+                        <th>工作时长</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable">
+                    <tr>
+                        <td colspan="6" class="no-records">暂无记录</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 初始化
+        document.getElementById('dateInput').valueAsDate = new Date();
+        updateDisplay();
+
+        // 注册Service Worker用于PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(() => console.log('Service Worker 注册成功'))
+                .catch((err) => console.log('Service Worker 注册失败:', err));
+        }
+
+        // 提示用户可以安装应用
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 可以在这里显示安装提示
+            console.log('可以安装PWA应用了！');
+        });
+
+        // 添加记录
+        function addRecord() {
+            try {
+                console.log('开始添加记录...');
+                
+                const employee = document.getElementById('employeeSelect').value;
+                const date = document.getElementById('dateInput').value;
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+
+                console.log('员工:', employee, '日期:', date, '上班:', startTime, '下班:', endTime);
+
+                if (!date || !startTime || !endTime) {
+                    alert('请填写完整信息！\n日期:' + (date ? '✓' : '✗') + '\n上班时间:' + (startTime ? '✓' : '✗') + '\n下班时间:' + (endTime ? '✓' : '✗'));
+                    return;
+                }
+
+                // 计算工作时长
+                const start = new Date(`2000-01-01T${startTime}`);
+                const end = new Date(`2000-01-01T${endTime}`);
+                
+                if (end <= start) {
+                    alert('下班时间必须晚于上班时间！');
+                    return;
+                }
+
+                const totalMinutes = (end - start) / (1000 * 60);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = Math.round(totalMinutes % 60);
+                const hoursDecimal = (totalMinutes / 60).toFixed(2);
+                
+                console.log('工作时长:', hours, '小时', minutes, '分钟');
+
+                // 测试localStorage
+                if (typeof(Storage) === "undefined") {
+                    alert('您的浏览器不支持本地存储功能！请使用Chrome、Safari或Firefox浏览器。');
+                    return;
+                }
+
+                // 获取现有记录
+                let records = JSON.parse(localStorage.getItem('timeRecords') || '[]');
+                console.log('现有记录数:', records.length);
+
+                // 添加新记录
+                const newRecord = {
+                    id: Date.now(),
+                    employee,
+                    date,
+                    startTime,
+                    endTime,
+                    hours: hoursDecimal,
+                    hoursDisplay: `${hours}小时${minutes}分钟`
+                };
+                
+                records.push(newRecord);
+                console.log('新记录:', newRecord);
+
+                // 保存
+                localStorage.setItem('timeRecords', JSON.stringify(records));
+                console.log('保存成功！总记录数:', records.length);
+
+                // 清空输入
+                document.getElementById('startTime').value = '';
+                document.getElementById('endTime').value = '';
+
+                // 更新显示
+                updateDisplay();
+                
+                alert('✅ 记录添加成功！\n员工: ' + employee + '\n工作时长: ' + hours + '小时' + minutes + '分钟');
+                
+            } catch (error) {
+                console.error('添加记录出错:', error);
+                alert('❌ 添加失败！错误信息: ' + error.message);
+            }
+        }
+
+        // 删除记录
+        function deleteRecord(id) {
+            if (!confirm('确定要删除这条记录吗？')) return;
+
+            let records = JSON.parse(localStorage.getItem('timeRecords') || '[]');
+            records = records.filter(r => r.id !== id);
+            localStorage.setItem('timeRecords', JSON.stringify(records));
+            updateDisplay();
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const records = JSON.parse(localStorage.getItem('timeRecords') || '[]');
+            
+            // 获取当前月份
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('currentMonth').textContent = 
+                `${now.getFullYear()}年${now.getMonth() + 1}月工时统计`;
+
+            // 过滤本月记录
+            const monthRecords = records.filter(r => r.date.startsWith(currentMonth));
+
+            // 计算每人总工时
+            const employeeHours = {
+                'Lilou': 0,
+                'Jules': 0,
+                'Charline': 0
+            };
+
+            monthRecords.forEach(r => {
+                employeeHours[r.employee] += parseFloat(r.hours);
+            });
+
+            // 更新汇总卡片
+            const summaryHtml = Object.keys(employeeHours).map(name => {
+                const totalMinutes = employeeHours[name] * 60;
+                const hrs = Math.floor(totalMinutes / 60);
+                const mins = Math.round(totalMinutes % 60);
+                return `
+                <div class="summary-card">
+                    <h3>${name}</h3>
+                    <div class="hours">${hrs}小时${mins}分</div>
+                </div>
+                `;
+            }).join('');
+            document.getElementById('summaryCards').innerHTML = summaryHtml;
+
+            // 更新表格
+            const tbody = document.getElementById('recordsTable');
+            
+            if (monthRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-records">本月暂无记录</td></tr>';
+                return;
+            }
+
+            // 按日期排序
+            monthRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            tbody.innerHTML = monthRecords.map(r => {
+                // 转换显示格式
+                const totalMinutes = parseFloat(r.hours) * 60;
+                const hrs = Math.floor(totalMinutes / 60);
+                const mins = Math.round(totalMinutes % 60);
+                const timeDisplay = r.hoursDisplay || `${hrs}小时${mins}分钟`;
+                
+                return `
+                <tr>
+                    <td>${r.date}</td>
+                    <td><strong>${r.employee}</strong></td>
+                    <td>${r.startTime}</td>
+                    <td>${r.endTime}</td>
+                    <td><strong>${timeDisplay}</strong></td>
+                    <td><button class="delete-btn" onclick="deleteRecord(${r.id})">删除</button></td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // 导出Excel
+        function exportToExcel() {
+            const records = JSON.parse(localStorage.getItem('timeRecords') || '[]');
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const monthRecords = records.filter(r => r.date.startsWith(currentMonth));
+
+            if (monthRecords.length === 0) {
+                alert('本月暂无记录可导出！');
+                return;
+            }
+
+            // 按员工和日期排序
+            monthRecords.sort((a, b) => {
+                if (a.employee !== b.employee) return a.employee.localeCompare(b.employee);
+                return new Date(a.date) - new Date(b.date);
+            });
+
+            // 计算每人总计
+            const employeeHours = {};
+            monthRecords.forEach(r => {
+                employeeHours[r.employee] = (employeeHours[r.employee] || 0) + parseFloat(r.hours);
+            });
+
+            // 生成CSV内容
+            let csv = '\uFEFF'; // UTF-8 BOM
+            csv += '日期,员工,上班时间,下班时间,工作时长(小时)\n';
+            
+            monthRecords.forEach(r => {
+                csv += `${r.date},${r.employee},${r.startTime},${r.endTime},${r.hours}\n`;
+            });
+
+            csv += '\n月度汇总\n';
+            Object.keys(employeeHours).forEach(name => {
+                csv += `${name},,,,${employeeHours[name].toFixed(2)}\n`;
+            });
+
+            // 下载文件
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `员工工时记录_${now.getFullYear()}年${now.getMonth() + 1}月.csv`;
+            link.click();
+
+            alert('✅ 导出成功！');
+        }
+    </script>
+</body>
+</html>
